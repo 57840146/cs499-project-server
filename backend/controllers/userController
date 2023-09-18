@@ -1,0 +1,37 @@
+const asyncHandler = require('express-async-handler')
+
+// @desc get user
+// @route Get /api/users
+// @access Private
+const getUser = asyncHandler(async (req,res) =>{
+    res.status(200).json({message:'Get User'})
+})
+
+// @desc Post user
+// @route Post /api/users
+// @access Private
+const setUser = asyncHandler(async (req,res) =>{
+    if(!req.body.text){
+        res.status(400)
+        throw new Error('Please add a text field')
+    }
+    res.status(200).json({ message: 'Create User' })
+})
+
+// @desc Update user
+// @route Update /api/users/:id
+// @access Private
+const updateUser = asyncHandler(async (req,res) =>{
+    res.status(200).json({ message: `Update User ${req.params.id}` })
+})
+
+// @desc delete user
+// @route delete /api/users/:id
+// @access Private
+const deleteUser = asyncHandler(async (req,res) =>{
+    res.status(200).json({ message: `Delete User ${req.params.id}` })
+})
+
+module.exports ={
+    getUser,setUser,updateUser,deleteUser,
+}
