@@ -14,7 +14,7 @@ const registerUserAccount = asyncHandler(async (req, res) => {
     throw new Error('Please add all fields')
   }
   // Check if user exists
-  const userExist = await User.findOne({ email })
+  const userExist = await UserAccount.findOne({ email })
 
   if (userExist) {
     res.status(400)
@@ -29,6 +29,7 @@ const registerUserAccount = asyncHandler(async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    phonenumber,
   })
 
   if (userAccount) {
@@ -36,8 +37,12 @@ const registerUserAccount = asyncHandler(async (req, res) => {
       _id: userAccount.id,
       name: userAccount.name,
       email: userAccount.email,
+      phonenumber: userAccount.phonenumber,
+      token: generateToken(userAccount._id),
     })
   } else {
+    res.status(400)
+    throw new Error('Invalid User Account Data')
   }
   res.json({ message: 'Register User Account' })
 })
@@ -45,16 +50,47 @@ const registerUserAccount = asyncHandler(async (req, res) => {
 // @route   Post /api/userAccount/login
 // @access  Public
 const loginUserAccount = asyncHandler(async (req, res) => {
+  const { email, password } = req.body
+
+  //check for user email
+  const userAccount = await UserAccount.findOne({ email })
+
+  if (userAccount && (await bcrypt.compare(password, userAccount.password))) {
+    res.json({
+      _id: userAccount.id,
+      name: userAccount.name,
+      email: userAccount.email,
+      phonenumber: userAccount.phonenumber,
+      token: generateToken(userAccount._id),
+    })
+  } else {
+    res.status(400)
+    throw new Error('Invalid Credentials')
+  }
+
   res.json({ message: 'Login User Account' })
 })
 
 // @desc    Get User Data
 // @route   Get /api/userAccount/me
-// @access  Public
+// @access  Private
 const getMe = asyncHandler(async (req, res) => {
-  res.json({ message: 'User Data Display' })
+  const { _id, name, email, phonenumber } = await UserAccount.findById(
+    req.userAccount.id,
+  )
+
+  res.status(200).json({
+    id: _id,
+    name,
+    email,
+    phonenumber,
+  })
 })
 
+//generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' })
+}
 module.exports = {
   registerUserAccount,
   loginUserAccount,
