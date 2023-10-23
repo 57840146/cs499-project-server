@@ -19,7 +19,7 @@ const protect = asyncHandler(async (req, res, next) => {
       req.userAccount = await UserAccount.findById(decoded.id).select(
         '-password',
       )
-
+      
       next()
     } catch (error) {
       console.log(error)

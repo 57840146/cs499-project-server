@@ -7,9 +7,9 @@ const UserAccount = require('../models/userAccountModel')
 // @route   Post /api/userAccount
 // @access  Public
 const registerUserAccount = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body
+  const { name, email, password, phonenumber } = req.body
 
-  if (!name || !email || !password) {
+  if (!name || !email || !password || !phonenumber) {
     res.status(400)
     throw new Error('Please add all fields')
   }
@@ -29,6 +29,7 @@ const registerUserAccount = asyncHandler(async (req, res) => {
     name,
     email,
     password: hashedPassword,
+    phonenumber,
   })
 
   if (userAccount) {
@@ -36,6 +37,7 @@ const registerUserAccount = asyncHandler(async (req, res) => {
       _id: userAccount.id,
       name: userAccount.name,
       email: userAccount.email,
+      phonenumber: userAccount.phonenumber,
       token: generateToken(userAccount._id),
     })
   } else {
@@ -58,6 +60,7 @@ const loginUserAccount = asyncHandler(async (req, res) => {
       _id: userAccount.id,
       name: userAccount.name,
       email: userAccount.email,
+      phonenumber: userAccount.phonenumber,
       token: generateToken(userAccount._id),
     })
   } else {
@@ -72,12 +75,15 @@ const loginUserAccount = asyncHandler(async (req, res) => {
 // @route   Get /api/userAccount/me
 // @access  Private
 const getMe = asyncHandler(async (req, res) => {
-  const { _id, name, email } = await UserAccount.findById(req.userAccount.id)
+  const { _id, name, email, phonenumber } = await UserAccount.findById(
+    req.userAccount.id,
+  )
 
   res.status(200).json({
     id: _id,
     name,
     email,
+    phonenumber,
   })
 })
 
