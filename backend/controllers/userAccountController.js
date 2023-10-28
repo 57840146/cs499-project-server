@@ -87,6 +87,32 @@ const getMe = asyncHandler(async (req, res) => {
   })
 })
 
+// @desc    Delete user
+// @route   DELETE /api/userAccount/deleteUserAccount
+// @access  Private
+const deleteUserAccount = asyncHandler(async (req, res) => {
+
+  const queryResponse = await UserAccount.deleteOne({"id":req.userAccount.id});
+
+  res.status(202).json(
+    queryResponse
+  )
+})
+
+// @desc    Update user information
+// @route   PATCH /api/userAccount/updateUserAccount
+// @access  Private
+const updateUserAccount = asyncHandler(async (req, res) => {
+  let queryResponse = await UserAccount.updateOne({"id":req.userAccount.id},
+    req.body
+  )
+
+  res.status(200).json(
+    queryResponse
+  )
+})
+
+
 //generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' })
@@ -94,5 +120,7 @@ const generateToken = (id) => {
 module.exports = {
   registerUserAccount,
   loginUserAccount,
+  deleteUserAccount, 
+  updateUserAccount,
   getMe,
 }

@@ -1,36 +1,16 @@
 const mongoose = require('mongoose')
+// const order = require('./orderModel/order')
 
-const userAccountSchema = mongoose.Schema(
+const cartItem = new Schema({
+  title:String,
+  description:String,
+  price:String,
+})
+
+const cartModelSchema = mongoose.Schema(
   {
-    firstName: {
-      type: String,
-      required: [true, 'Please add first name'],
-    },
-    lastName: {
-      type: String,
-      required: [true, 'Please add last name'],
-    },
-    address: {
-      type: String,
-      required: [true, 'Please add an address'],
-    },
-    email: {
-      type: String,
-      required: [true, 'Please add an email'],
-      unique: true,
-    },
-    password: {
-      type: String,
-      required: [true, 'Please add a password'],
-    },
-    phoneNumber: {
-      type: String,
-      required: [true, 'Please add a phone number'],
-    },
-  },
-  {
-    timestamps: true,
+    items: [cartItem]
   },
 )
 
-module.exports = mongoose.model('UserAccount', userAccountSchema)
+module.exports = mongoose.model('cart', cartModelSchema)

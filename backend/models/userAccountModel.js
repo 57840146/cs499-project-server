@@ -26,7 +26,7 @@ const userAccountSchema = mongoose.Schema(
     phoneNumber: {
       type: String,
       required: [true, 'Please add a phone number'],
-    },
+    }, // add MRU for orders
   },
   {
     timestamps: true,
