@@ -2,11 +2,11 @@ const mongoose = require('mongoose')
 
 const userAccountSchema = mongoose.Schema(
   {
-    firstName: {
+    firstname: {
       type: String,
       required: [true, 'Please add first name'],
     },
-    lastName: {
+    lastname: {
       type: String,
       required: [true, 'Please add last name'],
     },
@@ -23,10 +23,26 @@ const userAccountSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add a password'],
     },
-    phoneNumber: {
+    phonenumber: {
       type: String,
       required: [true, 'Please add a phone number'],
-    }, // add MRU for orders
+    },
+    balance: {
+      type: mongoose.Decimal128,
+      default: 999999,
+    },
+    orderhistory: [
+      {
+        ordertotal: {
+          type: mongoose.Decimal128,
+        },
+        orderitemsid: [Number],
+        orderitemsamt: [Number],
+        orderdate: {
+          type: String,
+        },
+      },
+    ],
   },
   {
     timestamps: true,

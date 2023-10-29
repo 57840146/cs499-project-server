@@ -5,6 +5,7 @@ const {
   loginUserAccount,
   deleteUserAccount,
   updateUserAccount,
+  addOrder,
   getMe,
 } = require('../controllers/userAccountController')
 
@@ -14,6 +15,7 @@ router.post('/', registerUserAccount)
 router.post('/login', loginUserAccount)
 router.delete('/delete', protect, deleteUserAccount)
 router.patch('/update', protect, updateUserAccount)
+router.post('/addorder', addOrder)
 router.get('/me', protect, getMe)
 
 module.exports = router

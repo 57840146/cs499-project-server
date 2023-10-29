@@ -7,9 +7,23 @@ const UserAccount = require('../models/userAccountModel')
 // @route   Post /api/userAccount
 // @access  Public
 const registerUserAccount = asyncHandler(async (req, res) => {
-  const { name, email, password, phonenumber } = req.body
+  const {
+    firstname,
+    lastname,
+    address,
+    email,
+    password,
+    phonenumber,
+  } = req.body
 
-  if (!name || !email || !password || !phonenumber) {
+  if (
+    !firstname ||
+    !lastname ||
+    !address ||
+    !email ||
+    !password ||
+    !phonenumber
+  ) {
     res.status(400)
     throw new Error('Please add all fields')
   }
@@ -26,7 +40,9 @@ const registerUserAccount = asyncHandler(async (req, res) => {
 
   //create userAccount
   const userAccount = await UserAccount.create({
-    name,
+    firstname,
+    lastname,
+    address,
     email,
     password: hashedPassword,
     phonenumber,
@@ -46,6 +62,31 @@ const registerUserAccount = asyncHandler(async (req, res) => {
   }
   res.json({ message: 'Register User Account' })
 })
+// @desc    AddOrder
+// @route   Post /api/userAccount/addorder
+// @access  Public
+const addOrder = asyncHandler(async (req, res) => {
+  const { email, ordertotal, orderitemsid, orderitemsamt } = req.body
+  //check for user email
+  const filter = { email: 'qizongliang@gmail.com' }
+
+  const userAccount = await UserAccount.findOne({ email })
+  await UserAccount.findOneAndUpdate(filter, {
+    $inc: { balance: -ordertotal },
+  })
+
+  const order = {
+    ordertotal: ordertotal,
+    orderitemsid: orderitemsid.split(','),
+    orderitemsamt: orderitemsamt.split(','),
+    orderdate: '10/29/2023',
+  }
+  userAccount.orderhistory.push(order)
+  userAccount.save()
+
+  res.json({ message: 'updated order' })
+})
+
 // @desc    Authenticate a user
 // @route   Post /api/userAccount/login
 // @access  Public
@@ -58,7 +99,7 @@ const loginUserAccount = asyncHandler(async (req, res) => {
   if (userAccount && (await bcrypt.compare(password, userAccount.password))) {
     res.json({
       _id: userAccount.id,
-      name: userAccount.name,
+      firstname: userAccount.firstname,
       email: userAccount.email,
       phonenumber: userAccount.phonenumber,
       token: generateToken(userAccount._id),
@@ -75,13 +116,12 @@ const loginUserAccount = asyncHandler(async (req, res) => {
 // @route   Get /api/userAccount/me
 // @access  Private
 const getMe = asyncHandler(async (req, res) => {
-  const { _id, name, email, phonenumber } = await UserAccount.findById(
+  const { _id, email, phonenumber } = await UserAccount.findById(
     req.userAccount.id,
   )
 
   res.status(200).json({
     id: _id,
-    name,
     email,
     phonenumber,
   })
@@ -91,27 +131,22 @@ const getMe = asyncHandler(async (req, res) => {
 // @route   DELETE /api/userAccount/deleteUserAccount
 // @access  Private
 const deleteUserAccount = asyncHandler(async (req, res) => {
+  const queryResponse = await UserAccount.deleteOne({ id: req.userAccount.id })
 
-  const queryResponse = await UserAccount.deleteOne({"id":req.userAccount.id});
-
-  res.status(202).json(
-    queryResponse
-  )
+  res.status(202).json(queryResponse)
 })
 
 // @desc    Update user information
 // @route   PATCH /api/userAccount/updateUserAccount
 // @access  Private
 const updateUserAccount = asyncHandler(async (req, res) => {
-  let queryResponse = await UserAccount.updateOne({"id":req.userAccount.id},
-    req.body
+  let queryResponse = await UserAccount.updateOne(
+    { id: req.userAccount.id },
+    req.body,
   )
 
-  res.status(200).json(
-    queryResponse
-  )
+  res.status(200).json(queryResponse)
 })
-
 
 //generate JWT
 const generateToken = (id) => {
@@ -120,7 +155,8 @@ const generateToken = (id) => {
 module.exports = {
   registerUserAccount,
   loginUserAccount,
-  deleteUserAccount, 
+  deleteUserAccount,
   updateUserAccount,
+  addOrder,
   getMe,
 }
