@@ -68,7 +68,10 @@ const registerUserAccount = asyncHandler(async (req, res) => {
   if (userAccount) {
     res.status(201).json({
       _id: userAccount.id,
-      name: userAccount.name,
+      firstname: userAccount.firstname,
+      lastname: userAccount.lastname,
+      address: userAccount.address,
+      balance: userAccount.balance,
       email: userAccount.email,
       phonenumber: userAccount.phonenumber,
       token: generateToken(userAccount._id),
@@ -116,6 +119,9 @@ const loginUserAccount = asyncHandler(async (req, res) => {
     res.json({
       _id: userAccount.id,
       firstname: userAccount.firstname,
+      lastname: userAccount.lastname,
+      address: userAccount.address,
+      balance: userAccount.balance,
       email: userAccount.email,
       phonenumber: userAccount.phonenumber,
       token: generateToken(userAccount._id),
@@ -148,10 +154,10 @@ const getMe = asyncHandler(async (req, res) => {
     firstname,
     lastname,
     address,
-    balance,
+    balance: balance.toString(),
     email,
     phonenumber,
-    orderhistory,
+    orderhistory: JSON.stringify(orderhistory),
   })
 })
 
