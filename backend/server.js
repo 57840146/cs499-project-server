@@ -16,6 +16,8 @@ app.use('/api/userAccount', require('./routes/userAccountRoutes'))
 
 app.use('/api/items', require('./routes/itemRoutes'))
 
+app.use('/api/orderHistory', require('./routes/orderHistoryRoutes'))
+
 app.use(errorHandler)
 
 app.listen(port, () => console.log(`Server started on port ${port}`))

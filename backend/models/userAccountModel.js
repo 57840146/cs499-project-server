@@ -31,21 +31,10 @@ const userAccountSchema = mongoose.Schema(
       type: mongoose.Decimal128,
       default: 999999,
     },
-    orderhistory: [
-      {
-        ordertotal: {
-          type: mongoose.Decimal128,
-        },
-        orderitemsid: [Number],
-        orderitemsamt: [Number],
-        orderdate: {
-          type: String,
-        },
-      },
-    ],
   },
   {
     timestamps: true,
+    strict: false,
   },
 )
 

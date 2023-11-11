@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const { Schema } = mongoose
 
 const itemsSchema = mongoose.Schema(
   {
@@ -18,13 +19,11 @@ const itemsSchema = mongoose.Schema(
       type: String,
       required: [true, 'Please add img url'],
     },
-    selleremail: {
-      type: String,
-      required: [true, 'Please add Seller email'],
-    },
+    seller: { type: Schema.Types.ObjectId, ref: 'UserAccount' },
   },
   {
     timestamps: true,
+    strict: false,
   },
 )
 

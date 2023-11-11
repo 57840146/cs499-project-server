@@ -3,23 +3,6 @@ const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const UserAccount = require('../models/userAccountModel')
 
-//get today's date
-function getTodayDate() {
-  var today = new Date()
-  var dd = today.getDate()
-
-  var mm = today.getMonth() + 1
-  var yyyy = today.getFullYear()
-  if (dd < 10) {
-    dd = '0' + dd
-  }
-
-  if (mm < 10) {
-    mm = '0' + mm
-  }
-  return mm + '/' + dd + '/' + yyyy
-}
-
 // @desc    Register new user Account
 // @route   Post /api/userAccount
 // @access  Public
@@ -82,29 +65,6 @@ const registerUserAccount = asyncHandler(async (req, res) => {
   }
   res.json({ message: 'Register User Account' })
 })
-// @desc    AddOrder
-// @route   Post /api/userAccount/addorder
-// @access  Public
-const addOrder = asyncHandler(async (req, res) => {
-  const { email, ordertotal, orderitemsid, orderitemsamt } = req.body
-  //check for user email
-  const filter = { email: email }
-
-  const userAccount = await UserAccount.findOne({ email })
-  await UserAccount.findOneAndUpdate(filter, {
-    $inc: { balance: -ordertotal },
-  })
-  const order = {
-    ordertotal: ordertotal,
-    orderitemsid: orderitemsid.split(','),
-    orderitemsamt: orderitemsamt.split(','),
-    orderdate: getTodayDate(),
-  }
-  userAccount.orderhistory.push(order)
-  userAccount.save()
-
-  res.json({ message: 'updated order' })
-})
 
 // @desc    Authenticate a user
 // @route   Post /api/userAccount/login
@@ -146,7 +106,6 @@ const getMe = asyncHandler(async (req, res) => {
     balance,
     email,
     phonenumber,
-    orderhistory,
   } = await UserAccount.findById(req.userAccount.id)
 
   res.status(200).json({
@@ -157,7 +116,6 @@ const getMe = asyncHandler(async (req, res) => {
     balance: balance.toString(),
     email,
     phonenumber,
-    orderhistory: JSON.stringify(orderhistory),
   })
 })
 
@@ -191,6 +149,5 @@ module.exports = {
   loginUserAccount,
   deleteUserAccount,
   updateUserAccount,
-  addOrder,
   getMe,
 }
