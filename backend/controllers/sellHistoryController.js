@@ -3,7 +3,7 @@ const { Schema } = mongoose
 const Items = require('../models/ItemsModel')
 const UserAccount = require('../models/userAccountModel')
 const asyncHandler = require('express-async-handler')
-const SellHistory = require('../models/orderHistory')
+const SellHistory = require('../models/sellHistory')
 
 //get today's date
 function getTodayDate() {
@@ -21,42 +21,74 @@ function getTodayDate() {
   }
   return mm + '/' + dd + '/' + yyyy
 }
+//Remove filter
+function removewithfilter(arr) {
+  let outputArray = arr.filter(function (v, i, self) {
+    // It returns the index of the first
+    // instance of each value
+    return i == self.indexOf(v)
+  })
+
+  return outputArray
+}
+
 // @desc    AddSellOrder
 // @route   Post /api/sellHistory/addSellOrder
 // @access  Public
 const addSellOrder = asyncHandler(async (req, res) => {
-  const { email, ordertotal, orderitemsid, orderitemsamt, address } = req.body
-
-  //check for user email
-  const filter = { email: email }
-
-  const userAccount = await UserAccount.findOne({ email: email }) // find the seller email
-  await UserAccount.findOneAndUpdate(filter, {
-    $inc: { balance: ordertotal },
-  })
+  const { orderitemsid, orderitemsamt, address } = req.body
 
   var orderItems = orderitemsid.split(',')
+  var allSeller = []
+  var orderSellerEmail = []
   var orderItemsAmt = orderitemsamt.split(',')
   var orderItemsArray = []
-
+  var userAccount
+  var ordertotal = 0
+  var filter
+  //identitfy all the unique seller
   for (let i = 0; i < orderItems.length; i++) {
     var itemRef = await Items.findOne({ id: orderItems[i] })
-
-    orderItemsArray.push({
-      itemid: itemRef.id,
-      amount: orderItemsAmt[i],
-      price: itemRef.price,
-      title: itemRef.title,
-    })
+    userAccount = await UserAccount.findById(itemRef.seller)
+    orderSellerEmail.push(userAccount.email)
   }
-  //Create Item
-  const item = await SellHistory.create({
-    seller: userAccount,
-    ordertotal: ordertotal,
-    orderdate: getTodayDate(),
-    orderItems: orderItemsArray,
-    address: address,
-  })
+  allSeller = removewithfilter(orderSellerEmail)
+  for (let i = 0; i < allSeller.length; i++) {
+    // all unique seller email
+    for (let j = 0; j < orderItems.length; j++) {
+      // all seller email in order
+      var itemRef = await Items.findOne({ id: orderItems[j] })
+
+      if (orderSellerEmail[j] == allSeller[i]) {
+        orderItemsArray.push({
+          itemid: itemRef.id,
+          amount: orderItemsAmt[j],
+          price: itemRef.price,
+          title: itemRef.title,
+        })
+        ordertotal =
+          ordertotal + parseFloat(itemRef.price) * parseFloat(orderItemsAmt[j])
+      }
+    }
+
+    filter = { email: allSeller[i] } // update filter
+    userAccount = await UserAccount.findOne({ email: allSeller[i] }) // find the seller email
+
+    await UserAccount.findOneAndUpdate(filter, {
+      $inc: { balance: ordertotal.toString() },
+    })
+
+    // create item
+    await SellHistory.create({
+      seller: userAccount,
+      ordertotal: ordertotal,
+      orderdate: getTodayDate(),
+      sellItems: orderItemsArray,
+      address: address,
+    })
+    ordertotal = 0
+    orderItemsArray = []
+  }
 
   res.json({ message: 'updated order' })
 })
