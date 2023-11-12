@@ -3,7 +3,7 @@ const { Schema } = mongoose
 const Items = require('../models/ItemsModel')
 const UserAccount = require('../models/userAccountModel')
 const asyncHandler = require('express-async-handler')
-const OrderHistory = require('../models/orderHistory')
+const SellHistory = require('../models/orderHistory')
 
 //get today's date
 function getTodayDate() {
@@ -21,19 +21,23 @@ function getTodayDate() {
   }
   return mm + '/' + dd + '/' + yyyy
 }
-// @desc    AddOrder
-// @route   Post /api/orderHistory/addOrder
+// @desc    AddSellOrder
+// @route   Post /api/sellHistory/addSellOrder
 // @access  Public
-const addOrder = asyncHandler(async (req, res) => {
-  const { email, orderitemsid, orderitemsamt } = req.body
+const addSellOrder = asyncHandler(async (req, res) => {
+  const { email, ordertotal, orderitemsid, orderitemsamt, address } = req.body
 
   //check for user email
   const filter = { email: email }
-  const userAccount = await UserAccount.findOne({ email: email })
+
+  const userAccount = await UserAccount.findOne({ email: email }) // find the seller email
+  await UserAccount.findOneAndUpdate(filter, {
+    $inc: { balance: ordertotal },
+  })
+
   var orderItems = orderitemsid.split(',')
   var orderItemsAmt = orderitemsamt.split(',')
   var orderItemsArray = []
-  var ordertotal = 0
 
   for (let i = 0; i < orderItems.length; i++) {
     var itemRef = await Items.findOne({ id: orderItems[i] })
@@ -44,41 +48,36 @@ const addOrder = asyncHandler(async (req, res) => {
       price: itemRef.price,
       title: itemRef.title,
     })
-    ordertotal =
-      ordertotal + parseFloat(itemRef.price) * parseFloat(orderItemsAmt[i])
   }
   //Create Item
-  const item = await OrderHistory.create({
-    buyer: userAccount,
+  const item = await SellHistory.create({
+    seller: userAccount,
     ordertotal: ordertotal,
     orderdate: getTodayDate(),
     orderItems: orderItemsArray,
-  })
-
-  await UserAccount.findOneAndUpdate(filter, {
-    $inc: { balance: -ordertotal.toString() },
+    address: address,
   })
 
   res.json({ message: 'updated order' })
 })
 
-// @desc getAllBuyOrderFromEmail
-// @route Get /api/orderHistory/getAllBuyOrderFromEmail
+// @desc getAllSellOrderFromEmail
+// @route Get /api/sellHistory/getAllSellOrderFromEmail
 // @access Public
-const getAllBuyOrderFromEmail = asyncHandler(async (req, res) => {
+const getAllSellOrderFromEmail = asyncHandler(async (req, res) => {
   const { email } = req.body
 
   const userAccount = await UserAccount.findOne({ email: email })
 
-  const buyHistory = await OrderHistory.find({ buyer: userAccount }).populate(
-    'buyer',
+  const sellHistory = await SellHistory.find({ buyer: userAccount }).populate(
+    'seller',
   )
 
-  res.status(200).json(buyHistory)
+  res.status(200).json(sellHistory)
 })
 // getAllBuyOrderFromEmail,
 
 module.exports = {
-  addOrder,
-  getAllBuyOrderFromEmail,
+  addSellOrder,
+  getAllSellOrderFromEmail,
 }
