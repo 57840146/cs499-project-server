@@ -62,13 +62,11 @@ const addOrder = asyncHandler(async (req, res) => {
   res.json({ message: 'updated order' })
 })
 
-// @desc getAllBuyOrderFromEmail
-// @route Get /api/orderHistory/getAllBuyOrderFromEmail
+// @desc getAllBuyOrder
+// @route Get /api/orderHistory/getAllBuyOrder
 // @access Public
-const getAllBuyOrderFromEmail = asyncHandler(async (req, res) => {
-  const { email } = req.body
-
-  const userAccount = await UserAccount.findOne({ email: email })
+const getAllBuyOrder = asyncHandler(async (req, res) => {
+  const userAccount = await UserAccount.findById(req.userAccount.id)
 
   const buyHistory = await OrderHistory.find({ buyer: userAccount }).populate(
     'buyer',
@@ -80,5 +78,5 @@ const getAllBuyOrderFromEmail = asyncHandler(async (req, res) => {
 
 module.exports = {
   addOrder,
-  getAllBuyOrderFromEmail,
+  getAllBuyOrder,
 }

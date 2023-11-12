@@ -3,9 +3,11 @@ const router = express.Router()
 
 const {
   addOrder,
-  getAllBuyOrderFromEmail,
+  getAllBuyOrder,
 } = require('../controllers/orderHistoryController')
 
+const { protect } = require('../middleware/authMiddleware')
+
 router.post('/addOrder', addOrder)
-router.get('/getAllBuyOrderFromEmail', getAllBuyOrderFromEmail)
+router.get('/getAllBuyOrder', protect, getAllBuyOrder)
 module.exports = router

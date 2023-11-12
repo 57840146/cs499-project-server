@@ -93,23 +93,21 @@ const addSellOrder = asyncHandler(async (req, res) => {
   res.json({ message: 'updated order' })
 })
 
-// @desc getAllSellOrderFromEmail
-// @route Get /api/sellHistory/getAllSellOrderFromEmail
+// @desc getAllSellOrder
+// @route Get /api/sellHistory/getAllSellOrder
 // @access Public
-const getAllSellOrderFromEmail = asyncHandler(async (req, res) => {
-  const { email } = req.body
+const getAllSellOrder = asyncHandler(async (req, res) => {
+  const userAccount = await UserAccount.findById(req.userAccount.id)
 
-  const userAccount = await UserAccount.findOne({ email: email })
-
-  const sellHistory = await SellHistory.find({ buyer: userAccount }).populate(
+  const sellHistory = await SellHistory.find({ seller: userAccount }).populate(
     'seller',
   )
 
   res.status(200).json(sellHistory)
 })
-// getAllBuyOrderFromEmail,
+// getAllBuyOrder,
 
 module.exports = {
   addSellOrder,
-  getAllSellOrderFromEmail,
+  getAllSellOrder,
 }
